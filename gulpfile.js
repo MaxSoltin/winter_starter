@@ -1,6 +1,6 @@
-let localhost    = 'localhost', // Local domain
+let localhost    = 'astroom.loc', // Local domain
 		preprocessor = 'sass',
-		theme        = 'mytheme', // Theme folder name
+		theme        = 'astroom', // Theme folder name
 		fileswatch   = 'html,htm,php,txt,yaml,twig,json,md' // List of files extensions for watching & hard reload (comma separated)
 
 import pkg from 'gulp'
@@ -14,8 +14,9 @@ import gulpSass      from 'gulp-sass'
 import dartSass      from 'sass'
 import sassglob      from 'gulp-sass-glob'
 const  sass          = gulpSass(dartSass)
-import csso          from 'gulp-csso'
-import cssbeautify   from('gulp-cssbeautify')
+import stylglob      from 'gulp-noop'
+import postCss       from 'gulp-postcss'
+import cssnano       from 'cssnano'
 import autoprefixer  from 'autoprefixer'
 import concat        from 'gulp-concat'
 import rsync         from 'gulp-rsync'
@@ -72,9 +73,10 @@ function styles() {
 	return src([`themes/${theme}/assets/styles/${preprocessor}/theme.*`, `!themes/${theme}/assets/styles/${preprocessor}/_*.*`])
 	.pipe(eval(`${preprocessor}glob`)())
 	.pipe(eval(preprocessor)({ 'include css': true }))
-	.pipe(csso())
-	.pipe(cssbeautify())
-	.pipe(autoprefixer({ overrideBrowserslist: ['last 15 versions'], grid: true }))
+    .pipe(postCss([
+		autoprefixer({ grid: 'autoplace' }),
+		cssnano({ preset: ['default', { discardComments: { removeAll: true } }] })
+	]))
 	.pipe(concat('theme.min.css'))
 	.pipe(dest(`themes/${theme}/assets/css`))
 	.pipe(browserSync.stream())
