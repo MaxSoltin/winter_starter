@@ -14,8 +14,8 @@ import gulpSass      from 'gulp-sass'
 import dartSass      from 'sass'
 import sassglob      from 'gulp-sass-glob'
 const  sass          = gulpSass(dartSass)
-import stylglob      from 'gulp-noop'
-import cssnano       from 'cssnano'
+import csso          from 'gulp-csso'
+import cssbeautify   from('gulp-cssbeautify')
 import autoprefixer  from 'autoprefixer'
 import concat        from 'gulp-concat'
 import rsync         from 'gulp-rsync'
@@ -72,10 +72,9 @@ function styles() {
 	return src([`themes/${theme}/assets/styles/${preprocessor}/theme.*`, `!themes/${theme}/assets/styles/${preprocessor}/_*.*`])
 	.pipe(eval(`${preprocessor}glob`)())
 	.pipe(eval(preprocessor)({ 'include css': true }))
-	.pipe(postCss([
-		autoprefixer({ grid: 'autoplace' }),
-		cssnano({ preset: ['default', { discardComments: { removeAll: true } }] })
-	]))
+	.pipe(csso())
+	.pipe(cssbeautify())
+	.pipe(autoprefixer({ overrideBrowserslist: ['last 15 versions'], grid: true }))
 	.pipe(concat('theme.min.css'))
 	.pipe(dest(`themes/${theme}/assets/css`))
 	.pipe(browserSync.stream())
